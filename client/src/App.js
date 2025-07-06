@@ -74,7 +74,9 @@ function AppContent() {
             <SignUp />
           </PublicRoute>
         } />
+        {/* Public route for joining wishlists with invite code */}
         <Route path="/join/:inviteCode" element={<JoinWishlist />} />
+        <Route path="/join" element={<JoinWishlist />} />
         
         {/* Protected Routes */}
         <Route path="/" element={
