@@ -16,19 +16,43 @@ export function SocketProvider({ children }) {
   useEffect(() => {
     // Only connect to socket if user is authenticated
     if (currentUser && !socket) {
+      console.log('Initializing socket connection...');
+      const token = localStorage.getItem('token');
+      
+      // Configure socket with better connection options
+      console.log('Initializing socket with token:', token ? 'present' : 'missing');
+      
+      // Create socket with improved configuration
       const newSocket = io('http://localhost:5001', {
-        auth: {
-          token: localStorage.getItem('token')
-        }
+        auth: { token },
+        transports: ['polling', 'websocket'], // Start with polling first, then upgrade to websocket
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000,
+        withCredentials: true,
+        forceNew: true
       });
 
       newSocket.on('connect', () => {
-        console.log('Connected to socket server');
+        console.log('Connected to socket server with ID:', newSocket.id);
         setConnected(true);
       });
 
-      newSocket.on('disconnect', () => {
-        console.log('Disconnected from socket server');
+      newSocket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error.message);
+        // If auth error, try reconnecting with updated token
+        if (error.message.includes('auth')) {
+          const updatedToken = localStorage.getItem('token');
+          if (updatedToken && updatedToken !== token) {
+            newSocket.auth = { token: updatedToken };
+            newSocket.connect();
+          }
+        }
+      });
+
+      newSocket.on('disconnect', (reason) => {
+        console.log('Disconnected from socket server:', reason);
         setConnected(false);
       });
 
@@ -36,12 +60,14 @@ export function SocketProvider({ children }) {
 
       // Cleanup on unmount
       return () => {
+        console.log('Cleaning up socket connection');
         newSocket.disconnect();
       };
     }
 
     // If user logs out, disconnect socket
     if (!currentUser && socket) {
+      console.log('User logged out, disconnecting socket');
       socket.disconnect();
       setSocket(null);
       setConnected(false);
