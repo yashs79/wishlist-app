@@ -17,11 +17,17 @@ dotenv.config();
 // Initialize express app
 const app = express();
 const server = http.createServer(app);
+
+// Configure Socket.io with more specific options
 const io = socketIo(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-  }
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+  },
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
 // Middleware
@@ -65,6 +71,16 @@ app.use('/api/products', productRoutes);
 // Root route
 app.get('/', (req, res) => {
   res.send('FlockShop API is running');
+});
+
+// Test route - no authentication required
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API is working correctly',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
 });
 
 // Error handling middleware
