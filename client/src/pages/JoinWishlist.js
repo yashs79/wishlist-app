@@ -12,6 +12,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { joinWishlistByInviteCode } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import AuthModal from '../components/auth/AuthModal';
 
 const JoinWishlist = () => {
   const { inviteCode: urlInviteCode } = useParams();
@@ -22,23 +23,57 @@ const JoinWishlist = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  // If invite code is in URL, join automatically
+  // If invite code is in URL, join automatically or show auth modal
   useEffect(() => {
-    if (urlInviteCode && currentUser) {
-      handleJoinWishlist();
+    if (urlInviteCode) {
+      if (currentUser) {
+        handleJoinWishlist();
+      } else {
+        // Show auth modal if user is not authenticated
+        setAuthModalOpen(true);
+      }
     }
   }, [urlInviteCode, currentUser]);
 
-  const handleJoinWishlist = async () => {
-    if (!inviteCode.trim()) {
+  // Handle successful authentication from the modal
+  const handleAuthSuccess = (code) => {
+    console.log('Authentication successful, joining wishlist with code:', code || inviteCode);
+    setAuthModalOpen(false);
+    
+    // Wait a moment to ensure the token is properly set in localStorage
+    // and the currentUser context is updated
+    setTimeout(() => {
+      // Double-check that we have a token before attempting to join
+      const token = localStorage.getItem('token');
+      if (token) {
+        console.log('Token is available after auth, proceeding with join');
+        handleJoinWishlist(code || inviteCode);
+      } else {
+        console.error('No token available after authentication');
+        setError('Authentication succeeded but no token was found. Please try again.');
+      }
+    }, 1500); // Longer delay to ensure token is set
+  };
+
+  const handleJoinWishlist = async (codeToUse) => {
+    const codeToJoin = codeToUse || inviteCode;
+    
+    if (!codeToJoin.trim()) {
       return setError('Please enter an invite code');
+    }
+    
+    // Check if user is authenticated
+    if (!currentUser) {
+      setAuthModalOpen(true);
+      return;
     }
     
     try {
       setError('');
       setLoading(true);
-      const response = await joinWishlistByInviteCode(inviteCode);
+      const response = await joinWishlistByInviteCode(codeToJoin);
       setSuccess('Successfully joined wishlist!');
       
       // Redirect to the wishlist after a short delay
@@ -46,7 +81,10 @@ const JoinWishlist = () => {
         navigate(`/wishlist/${response.data._id}`);
       }, 1500);
     } catch (error) {
-      if (error.response?.status === 404) {
+      if (error.response?.status === 401) {
+        setError('Authentication failed. Please log in again.');
+        setAuthModalOpen(true);
+      } else if (error.response?.status === 404) {
         setError('Invalid invite code. Please check and try again.');
       } else if (error.response?.status === 400) {
         setError(error.response.data.message || 'You cannot join this wishlist.');
@@ -82,6 +120,22 @@ const JoinWishlist = () => {
           </Alert>
         )}
         
+        {!currentUser && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            You need to be logged in to join a wishlist.
+            <Box sx={{ mt: 1 }}>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={() => setAuthModalOpen(true)}
+                size="small"
+              >
+                Login / Register
+              </Button>
+            </Box>
+          </Alert>
+        )}
+        
         <Box sx={{ mt: 3 }}>
           <TextField
             fullWidth
@@ -105,7 +159,7 @@ const JoinWishlist = () => {
             
             <Button
               variant="contained"
-              onClick={handleJoinWishlist}
+              onClick={() => handleJoinWishlist()}
               disabled={loading || !inviteCode.trim() || !!success}
             >
               {loading ? <CircularProgress size={24} /> : 'Join Wishlist'}
@@ -113,6 +167,14 @@ const JoinWishlist = () => {
           </Box>
         </Box>
       </Paper>
+      
+      {/* Authentication Modal */}
+      <AuthModal 
+        open={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)}
+        inviteCode={inviteCode || urlInviteCode}
+        onAuthSuccess={handleAuthSuccess}
+      />
     </Container>
   );
 };
