@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -45,7 +45,7 @@ const WishlistDetail = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
   // Fetch wishlist data
-  const fetchWishlistData = async () => {
+  const fetchWishlistData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getWishlistById(id);
@@ -57,7 +57,7 @@ const WishlistDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   // Initial data fetch
   useEffect(() => {
@@ -70,7 +70,7 @@ const WishlistDetail = () => {
         leaveWishlist(id);
       }
     };
-  }, [id]);
+  }, [id, fetchWishlistData, leaveWishlist]);
 
   // Join socket room for real-time updates
   useEffect(() => {

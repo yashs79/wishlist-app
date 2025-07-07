@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
@@ -194,7 +194,7 @@ export function AuthProvider({ children }) {
   };
 
   // Check if token is valid and refresh if needed
-  const validateToken = async () => {
+  const validateToken = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       console.log('No token found in localStorage');
@@ -227,7 +227,7 @@ export function AuthProvider({ children }) {
       }
       return false;
     }
-  };
+  }, [currentUser, setCurrentUser]);
 
   // Listen for Firebase auth state changes
   useEffect(() => {
@@ -272,7 +272,7 @@ export function AuthProvider({ children }) {
     });
 
     return unsubscribe;
-  }, []);
+  }, [validateToken]);
 
   const value = {
     currentUser,

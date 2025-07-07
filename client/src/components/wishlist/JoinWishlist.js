@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -21,30 +21,7 @@ const JoinWishlist = ({ onJoinSuccess }) => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingInviteCode, setPendingInviteCode] = useState('');
 
-  // Effect to check for invite code in URL parameters when component mounts
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const codeFromUrl = queryParams.get('code');
-    
-    if (codeFromUrl) {
-      console.log('Found invite code in URL:', codeFromUrl);
-      setInviteCode(codeFromUrl);
-      
-      // If we have a code but no user, open auth modal
-      if (!currentUser) {
-        setPendingInviteCode(codeFromUrl);
-        setAuthModalOpen(true);
-      } else {
-        // If user is already logged in, attempt to join automatically
-        joinWishlistWithCode(codeFromUrl);
-      }
-      
-      // Remove the code from URL to prevent repeated attempts
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, [currentUser]);
-  
-  const joinWishlistWithCode = async (code) => {
+  const joinWishlistWithCode = useCallback(async (code) => {
     if (!code.trim()) {
       setError('Please enter an invite code');
       return;
@@ -104,7 +81,7 @@ const JoinWishlist = ({ onJoinSuccess }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, onJoinSuccess, setInviteCode, setError, setSuccess, setLoading, setPendingInviteCode, setAuthModalOpen, joinWishlistByInviteCode]);
   
   // Handle form submission
   const handleSubmit = async (e) => {

@@ -35,14 +35,12 @@ const placeholderImage = 'https://via.placeholder.com/300x200?text=No+Image';
 const emojis = ['👍', '❤️', '🎉', '😍', '🙌', '🔥'];
 
 const ProductCard = ({ product, wishlistId, onEdit, onDelete, onReaction, onComment }) => {
-  const { currentUser } = useAuth();
+  const { /* currentUser */ } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const isOwner = product.addedBy._id === currentUser._id;
   
   // Format price to display as currency
   const formattedPrice = new Intl.NumberFormat('en-US', {

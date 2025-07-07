@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -35,7 +35,7 @@ const JoinWishlist = () => {
         setAuthModalOpen(true);
       }
     }
-  }, [urlInviteCode, currentUser]);
+  }, [urlInviteCode, currentUser, handleJoinWishlist]);
 
   // Handle successful authentication from the modal
   const handleAuthSuccess = (code) => {
@@ -57,7 +57,7 @@ const JoinWishlist = () => {
     }, 1500); // Longer delay to ensure token is set
   };
 
-  const handleJoinWishlist = async (codeToUse) => {
+  const handleJoinWishlist = useCallback(async (codeToUse) => {
     const codeToJoin = codeToUse || inviteCode;
     
     if (!codeToJoin.trim()) {
@@ -95,7 +95,7 @@ const JoinWishlist = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [inviteCode, currentUser, navigate]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, mb: 8 }}>

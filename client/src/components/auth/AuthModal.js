@@ -45,7 +45,7 @@ const AuthModal = ({ open, onClose, inviteCode, onAuthSuccess }) => {
         const loginPassword = password || 'password123';
         
         console.log(`Attempting to login with ${loginEmail}`);
-        const response = await signin(loginEmail, loginPassword);
+        await signin(loginEmail, loginPassword);
         
         // Verify that we have a token after login
         const token = localStorage.getItem('token');

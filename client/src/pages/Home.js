@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Box, Button, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Divider, Paper, Tabs, Tab } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Typography, Grid, Box, Button, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Paper, Tabs, Tab } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Link as RouterLink } from 'react-router-dom';
@@ -23,7 +23,7 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   // Fetch user's wishlists
-  const fetchWishlists = async () => {
+  const fetchWishlists = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -57,14 +57,14 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Effect to fetch wishlists on component mount
   useEffect(() => {
     if (currentUser) {
       fetchWishlists();
     }
-  }, [currentUser]);
+  }, [currentUser, fetchWishlists]);
   
   // Socket context is already imported at the top of the component
   
