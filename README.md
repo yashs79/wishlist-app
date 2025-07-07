@@ -48,6 +48,9 @@ flockshop/
    cd client
    npm install
    ```
+4. Set up environment variables:
+   - For the server, create a `.env` file in the `server` directory (see `server/README.md` for details)
+   - For the client, create a `.env` file in the `client` directory with your Firebase configuration
 
 ### Running the Application
 
