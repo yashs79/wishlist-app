@@ -227,17 +227,20 @@ export function AuthProvider({ children }) {
       }
       return false;
     }
-  }, [currentUser, setCurrentUser]);
+  }, [currentUser]);
 
   // Listen for Firebase auth state changes
   useEffect(() => {
+    let isMounted = true;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!isMounted) return;
+      
       if (user) {
         try {
           // Validate token first
           const isTokenValid = await validateToken();
           
-          if (!isTokenValid) {
+          if (!isTokenValid && isMounted) {
             console.log('Token invalid or missing, attempting to refresh...');
             // If token is invalid, try to get a new one
             try {
@@ -247,32 +250,47 @@ export function AuthProvider({ children }) {
                 firebaseUid: user.uid
               });
               
-              localStorage.setItem('token', response.data.token);
-              console.log('Token refreshed successfully');
+              if (isMounted) {
+                localStorage.setItem('token', response.data.token);
+                console.log('Token refreshed successfully');
+              }
             } catch (refreshError) {
               console.error('Failed to refresh token:', refreshError);
             }
           }
           
-          // Get user profile from our backend
-          const profileResponse = await getProfile();
-          setCurrentUser({
-            ...user,
-            profile: profileResponse.data
-          });
+          // Only fetch profile if we don't already have current user data
+          if (!currentUser && isMounted) {
+            // Get user profile from our backend
+            const profileResponse = await getProfile();
+            if (isMounted) {
+              setCurrentUser({
+                ...user,
+                profile: profileResponse.data
+              });
+            }
+          }
         } catch (error) {
           console.error('Error fetching user profile:', error);
-          setCurrentUser(user);
+          if (isMounted) {
+            setCurrentUser(user);
+          }
         }
-      } else {
+      } else if (isMounted) {
         setCurrentUser(null);
         localStorage.removeItem('token'); // Clear token when user signs out
       }
-      setLoading(false);
+      
+      if (isMounted) {
+        setLoading(false);
+      }
     });
 
-    return unsubscribe;
-  }, [validateToken]);
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [validateToken, currentUser]);
 
   const value = {
     currentUser,

@@ -24,6 +24,9 @@ const Home = () => {
 
   // Fetch user's wishlists
   const fetchWishlists = useCallback(async () => {
+    // Prevent unnecessary API calls
+    if (!currentUser || loading) return;
+    
     try {
       setLoading(true);
       setError('');
@@ -57,13 +60,19 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser, loading]);
 
   // Effect to fetch wishlists on component mount
   useEffect(() => {
+    let isMounted = true;
+    
     if (currentUser) {
       fetchWishlists();
     }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [currentUser, fetchWishlists]);
   
   // Socket context is already imported at the top of the component

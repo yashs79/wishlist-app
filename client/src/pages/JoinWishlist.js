@@ -25,38 +25,6 @@ const JoinWishlist = () => {
   const [success, setSuccess] = useState('');
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  // If invite code is in URL, join automatically or show auth modal
-  useEffect(() => {
-    if (urlInviteCode) {
-      if (currentUser) {
-        handleJoinWishlist();
-      } else {
-        // Show auth modal if user is not authenticated
-        setAuthModalOpen(true);
-      }
-    }
-  }, [urlInviteCode, currentUser, handleJoinWishlist]);
-
-  // Handle successful authentication from the modal
-  const handleAuthSuccess = (code) => {
-    console.log('Authentication successful, joining wishlist with code:', code || inviteCode);
-    setAuthModalOpen(false);
-    
-    // Wait a moment to ensure the token is properly set in localStorage
-    // and the currentUser context is updated
-    setTimeout(() => {
-      // Double-check that we have a token before attempting to join
-      const token = localStorage.getItem('token');
-      if (token) {
-        console.log('Token is available after auth, proceeding with join');
-        handleJoinWishlist(code || inviteCode);
-      } else {
-        console.error('No token available after authentication');
-        setError('Authentication succeeded but no token was found. Please try again.');
-      }
-    }, 1500); // Longer delay to ensure token is set
-  };
-
   const handleJoinWishlist = useCallback(async (codeToUse) => {
     const codeToJoin = codeToUse || inviteCode;
     
@@ -95,7 +63,46 @@ const JoinWishlist = () => {
     } finally {
       setLoading(false);
     }
-  }, [inviteCode, currentUser, navigate]);
+  }, [currentUser, inviteCode, navigate, setAuthModalOpen, setError, setLoading, setSuccess]);
+
+  // If invite code is in URL, join automatically or show auth modal
+  useEffect(() => {
+    let hasAttemptedJoin = false;
+    
+    if (urlInviteCode && !hasAttemptedJoin) {
+      hasAttemptedJoin = true;
+      if (currentUser) {
+        handleJoinWishlist();
+      } else {
+        // Show auth modal if user is not authenticated
+        setAuthModalOpen(true);
+      }
+    }
+    
+    return () => {
+      hasAttemptedJoin = true;
+    };
+  }, [urlInviteCode, currentUser, handleJoinWishlist]);
+
+  // Handle successful authentication from the modal
+  const handleAuthSuccess = (code) => {
+    console.log('Authentication successful, joining wishlist with code:', code || inviteCode);
+    setAuthModalOpen(false);
+    
+    // Wait a moment to ensure the token is properly set in localStorage
+    // and the currentUser context is updated
+    setTimeout(() => {
+      // Double-check that we have a token before attempting to join
+      const token = localStorage.getItem('token');
+      if (token) {
+        console.log('Token is available after auth, proceeding with join');
+        handleJoinWishlist(code || inviteCode);
+      } else {
+        console.error('No token available after authentication');
+        setError('Authentication succeeded but no token was found. Please try again.');
+      }
+    }, 1500); // Longer delay to ensure token is set
+  };
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, mb: 8 }}>

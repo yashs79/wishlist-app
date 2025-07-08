@@ -25,11 +25,11 @@ export function SocketProvider({ children }) {
       // Create socket with improved configuration
       const newSocket = io('http://localhost:5001', {
         auth: { token },
-        transports: ['polling', 'websocket'], // Start with polling first, then upgrade to websocket
-        reconnectionAttempts: 5,
+        transports: ['polling'], // Use only polling to avoid WebSocket connection issues
+        reconnectionAttempts: 10,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
-        timeout: 20000,
+        timeout: 30000,
         withCredentials: true,
         forceNew: true
       });

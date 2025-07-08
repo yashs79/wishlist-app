@@ -46,6 +46,9 @@ const WishlistDetail = () => {
 
   // Fetch wishlist data
   const fetchWishlistData = useCallback(async () => {
+    // Prevent unnecessary API calls
+    if (!id || loading) return;
+    
     try {
       setLoading(true);
       const response = await getWishlistById(id);
@@ -57,15 +60,18 @@ const WishlistDetail = () => {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, loading]);
 
   // Initial data fetch
   useEffect(() => {
+    let isMounted = true;
+    
     if (id) {
       fetchWishlistData();
     }
     
     return () => {
+      isMounted = false;
       if (id) {
         leaveWishlist(id);
       }

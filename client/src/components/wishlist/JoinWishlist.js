@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -81,7 +81,7 @@ const JoinWishlist = ({ onJoinSuccess }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, onJoinSuccess, setInviteCode, setError, setSuccess, setLoading, setPendingInviteCode, setAuthModalOpen, joinWishlistByInviteCode]);
+  }, [currentUser, onJoinSuccess, setInviteCode, setError, setSuccess, setLoading, setPendingInviteCode, setAuthModalOpen]);
   
   // Handle form submission
   const handleSubmit = async (e) => {

@@ -35,7 +35,7 @@ const placeholderImage = 'https://via.placeholder.com/300x200?text=No+Image';
 const emojis = ['👍', '❤️', '🎉', '😍', '🙌', '🔥'];
 
 const ProductCard = ({ product, wishlistId, onEdit, onDelete, onReaction, onComment }) => {
-  const { /* currentUser */ } = useAuth();
+  useAuth(); // We need auth context but don't directly use it in this component
   const [anchorEl, setAnchorEl] = useState(null);
   const [emojiAnchorEl, setEmojiAnchorEl] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
