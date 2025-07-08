@@ -1,19 +1,16 @@
 {
   "version": 2,
-  "framework": "create-react-app",
   "builds": [
+    {
+      "src": "server/src/index.js",
+      "use": "@vercel/node"
+    },
     {
       "src": "client/package.json",
       "use": "@vercel/static-build",
       "config": { 
-        "distDir": "build",
-        "buildCommand": "cd client && npm run vercel-build",
-        "framework": "create-react-app"
+        "distDir": "build"
       }
-    },
-    {
-      "src": "server/src/index.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -27,22 +24,6 @@
     },
     {
       "handle": "filesystem"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
-      "src": "/asset-manifest.json",
-      "dest": "/asset-manifest.json"
     },
     {
       "src": "/(.*)",
