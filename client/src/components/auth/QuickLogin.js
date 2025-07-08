@@ -47,7 +47,9 @@ const QuickLogin = () => {
 
   const handleTestAuth = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/auth/check', {
+      // Use relative URL in production, localhost in development
+      const apiUrl = process.env.NODE_ENV === 'production' ? '/api/auth/check' : 'http://localhost:5001/api/auth/check';
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/api';
+// Use relative URLs in production, localhost in development
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? '/api'
+  : 'http://localhost:5001/api';
 
 // Create axios instance with base URL
 const api = axios.create({

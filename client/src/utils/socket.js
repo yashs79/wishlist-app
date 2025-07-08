@@ -1,7 +1,9 @@
 import { io } from 'socket.io-client';
 
 // Create a socket instance that connects to the server
-const socket = io('http://localhost:5001', {
+// Use relative URL in production, localhost in development
+const socketURL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5001';
+const socket = io(socketURL, {
   autoConnect: true,
   reconnection: true,
   reconnectionAttempts: 5,

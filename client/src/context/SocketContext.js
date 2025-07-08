@@ -23,7 +23,9 @@ export function SocketProvider({ children }) {
       console.log('Initializing socket with token:', token ? 'present' : 'missing');
       
       // Create socket with improved configuration
-      const newSocket = io('http://localhost:5001', {
+      // Use relative URL in production, localhost in development
+      const socketURL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5001';
+      const newSocket = io(socketURL, {
         auth: { token },
         transports: ['polling'], // Use only polling to avoid WebSocket connection issues
         reconnectionAttempts: 10,
