@@ -68,3 +68,40 @@ flockshop/
 ## License
 
 MIT
+graph TD
+    subgraph A[Presentation Layer]
+        UI[Conversational UI / Chatbot]
+    end
+
+    subgraph B[Application Layer - Core Logic]
+        NLP[NLP Engine]
+        SearchRec[Search & Recommendation Engine]
+    end
+
+    subgraph C[AI / Machine Learning Layer]
+        PriceModel[Price Prediction Model <br/><i>(LSTM, Boosting, etc.)</i>]
+        PersonalizationModel[Personalization Model <br/><i>(Collaborative Filtering, etc.)</i>]
+    end
+
+    subgraph D[Data Layer]
+        Aggregator[Data Aggregator]
+        UserDB[(User Profile Database)]
+        FlightDW[(Flight Data Warehouse)]
+    end
+
+    subgraph E[External Sources]
+        APIs[External Airline APIs / GDS]
+    end
+
+    %% --- Connections & Data Flow ---
+    User[User] --> UI
+    UI --> NLP
+    NLP --> SearchRec
+    SearchRec --> Aggregator
+    SearchRec --> PriceModel
+    SearchRec --> PersonalizationModel
+    PersonalizationModel --> UserDB
+    PriceModel --> FlightDW
+    Aggregator --> APIs
+    Aggregator --> FlightDW
+    SearchRec --> UI
